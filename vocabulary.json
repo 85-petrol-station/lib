@@ -1,0 +1,16 @@
+{
+  "journey": {"phonetic":"/ˈdʒɜːni/","meaning":"旅行；行程","pos":"名词"},
+  "reflection": {"phonetic":"/rɪˈflekʃn/","meaning":"反思；沉思","pos":"名词"},
+  "growth": {"phonetic":"/ɡrəʊθ/","meaning":"成长；增长","pos":"名词"},
+  "career": {"phonetic":"/kəˈrɪə(r)/","meaning":"职业；生涯","pos":"名词"},
+  "challenge": {"phonetic":"/ˈtʃælɪndʒ/","meaning":"挑战","pos":"名词"},
+  "loneliness": {"phonetic":"/ˈləʊnlinəs/","meaning":"孤独；寂寞","pos":"名词"},
+  "isolated": {"phonetic":"/ˈaɪsəleɪtɪd/","meaning":"孤立的；单独的","pos":"形容词"},
+  "mental": {"phonetic":"/ˈmentl/","meaning":"精神的；心理的","pos":"形容词"},
+  "physical": {"phonetic":"/ˈfɪzɪkl/","meaning":"身体的；物理的","pos":"形容词"},
+  "adventure": {"phonetic":"/ədˈventʃə(r)/","meaning":"冒险；奇遇","pos":"名词"},
+  "navigate": {"phonetic":"/ˈnævɪɡeɪt/","meaning":"导航；指引","pos":"动词"},
+  "embrace": {"phonetic":"/ɪmˈbreɪs/","meaning":"拥抱；接受","pos":"动词"},
+  "vast": {"phonetic":"/vɑːst/","meaning":"巨大的；广阔的","pos":"形容词"},
+  "emptiness": {"phonetic":"/ˈemptinəs/","meaning":"空旷；空虚","pos":"名词"}
+}
