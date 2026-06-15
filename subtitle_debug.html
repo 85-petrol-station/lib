@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>字幕加载诊断工具</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #2a2a2a;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+    h1 {
+      color: #00953d;
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #444;
+    }
+    .section:last-child {
+      border-bottom: none;
+    }
+    h2 {
+      color: #00953d;
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      background: #1a1a1a;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #00953d;
+      box-shadow: 0 0 0 3px rgba(0, 149, 61, 0.1);
+    }
+    button {
+      padding: 10px 20px;
+      background: #00953d;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+    }
+    button:hover {
+      background: #007a31;
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .output {
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 12px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .success { color: #4ade80; }
+    .error { color: #f87171; }
+    .warning { color: #facc15; }
+    .info { color: #60a5fa; }
+    .status-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    .status-table th, .status-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #444;
+    }
+    .status-table th {
+      background: #333;
+      color: #00953d;
+      font-weight: 600;
+    }
+    .status-ok { color: #4ade80; }
+    .status-error { color: #f87171; }
+    .vtt-preview {
+      background: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 12px;
+      font-family: monospace;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .vtt-line {
+      margin-bottom: 8px;
+      padding: 4px 0;
+    }
+    .vtt-timestamp {
+      color: #facc15;
+    }
+    .vtt-en {
+      color: #60a5fa;
+    }
+    .vtt-zh {
+      color: #4ade80;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎬 字幕加载诊断工具</h1>
+    
+    <div class="section">
+      <h2>1️⃣ 音频文件选择</h2>
+      <label for="audioSelect">选择音频文件：</label>
+      <select id="audioSelect">
+        <option value="">-- 选择音频 --</option>
+        <option value="audio_1.mp3">audio_1.mp3</option>
+        <option value="news_1.mp3">news_1.mp3</option>
+      </select>
+      <button onclick="checkAvailableFiles()">📂 检查可用文件</button>
+      <div id="fileCheckOutput" class="output" style="display:none;"></div>
+    </div>
+
+    <div class="section">
+      <h2>2️⃣ 字幕文件诊断</h2>
+      <label for="vttFile">字幕文件路径：</label>
+      <input type="text" id="vttFile" placeholder="e.g., audio_1.vtt">
+      <button onclick="diagnoseVttFile()">🔍 诊断字幕文件</button>
+      <div id="vttDiagOutput" class="output" style="display:none;"></div>
+    </div>
+
+    <div class="section">
+      <h2>3️⃣ 测试 Fetch 请求</h2>
+      <button onclick="testFetch()">🌐 测试 Fetch 请求</button>
+      <div id="fetchTestOutput" class="output" style="display:none;"></div>
+    </div>
+
+    <div class="section">
+      <h2>4️⃣ VTT 解析测试</h2>
+      <button onclick="parseAndPreviewVTT()">🔤 解析和预览 VTT</button>
+      <div id="parseOutput" class="output" style="display:none;"></div>
+      <div id="vttPreview" class="vtt-preview" style="display:none;"></div>
+    </div>
+
+    <div class="section">
+      <h2>5️⃣ 常见问题排查</h2>
+      <button onclick="fullDiagnosis()">🏥 完整诊断</button>
+      <div id="diagOutput" class="output" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const log = (msg, type = 'info') => {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = {
+        'success': '✅',
+        'error': '❌',
+        'warning': '⚠️',
+        'info': 'ℹ️'
+      }[type] || '•';
+      return `[${timestamp}] ${prefix} ${msg}`;
+    };
+
+    async function checkAvailableFiles() {
+      const output = document.getElementById('fileCheckOutput');
+      output.style.display = 'block';
+      output.innerHTML = log('开始检查可用文件...') + '\n';
+
+      const files = ['audio_1.mp3', 'audio_1.vtt', 'audio_1_副本.vtt', 'news_1.mp3', 'news_1.vtt', 'news_2.vtt'];
+      const results = [];
+
+      for (const file of files) {
+        try {
+          const res = await fetch(file, { method: 'HEAD' });
+          if (res.ok) {
+            results.push(log(`✓ 文件存在: ${file}`, 'success'));
+          } else {
+            results.push(log(`✗ 文件不存在 (HTTP ${res.status}): ${file}`, 'error'));
+          }
+        } catch (e) {
+          results.push(log(`✗ 无法访问: ${file} - ${e.message}`, 'error'));
+        }
+      }
+
+      output.innerHTML += results.join('\n');
+    }
+
+    async function diagnoseVttFile() {
+      const vttFile = document.getElementById('vttFile').value.trim();
+      const output = document.getElementById('vttDiagOutput');
+      output.style.display = 'block';
+      output.innerHTML = log(`诊断文件: ${vttFile || '(未指定)'}\n`) + '\n';
+
+      if (!vttFile) {
+        output.innerHTML += log('请输入字幕文件路径', 'warning');
+        return;
+      }
+
+      try {
+        // 1. 检查文件是否存在
+        output.innerHTML += log('检查文件是否存在...') + '\n';
+        const headRes = await fetch(vttFile, { method: 'HEAD' });
+        if (!headRes.ok) {
+          output.innerHTML += log(`文件不存在 (HTTP ${headRes.status})`, 'error') + '\n';
+          return;
+        }
+        output.innerHTML += log(`文件存在 (HTTP ${headRes.ok ? 200 : headRes.status})`, 'success') + '\n';
+
+        // 2. 获取文件内容
+        output.innerHTML += log('获取文件内容...') + '\n';
+        const res = await fetch(vttFile);
+        const text = await res.text();
+        output.innerHTML += log(`成功读取 ${text.length} 字符`, 'success') + '\n';
+
+        // 3. 验证 VTT 格式
+        output.innerHTML += log('验证 VTT 格式...') + '\n';
+        if (!text.includes('WEBVTT')) {
+          output.innerHTML += log('⚠️ 警告: 文件不包含 WEBVTT 标记', 'warning') + '\n';
+        } else {
+          output.innerHTML += log('✓ 文件包含 WEBVTT 标记', 'success') + '\n';
+        }
+
+        // 4. 统计字幕条目
+        const lines = text.split('\n');
+        const subtitleCount = lines.filter(line => line.includes('-->')).length;
+        output.innerHTML += log(`找到 ${subtitleCount} 条字幕`, 'info') + '\n';
+
+        // 5. 检查编码
+        const decoder = new TextDecoder();
+        output.innerHTML += log('文件编码检测: UTF-8', 'info') + '\n';
+
+      } catch (e) {
+        output.innerHTML += log(`错误: ${e.message}`, 'error') + '\n';
+        output.innerHTML += log(`错误类型: ${e.name}`, 'error') + '\n';
+      }
+    }
+
+    async function testFetch() {
+      const vttFile = document.getElementById('vttFile').value.trim() || 'audio_1.vtt';
+      const output = document.getElementById('fetchTestOutput');
+      output.style.display = 'block';
+      output.innerHTML = log('测试 Fetch 请求...') + '\n\n';
+
+      try {
+        output.innerHTML += log(`尝试访问: ${vttFile}`) + '\n';
+        const res = await fetch(vttFile);
+        output.innerHTML += log(`HTTP 状态: ${res.status} ${res.statusText}`, 'info') + '\n';
+        output.innerHTML += log(`Content-Type: ${res.headers.get('content-type')}`, 'info') + '\n';
+        output.innerHTML += log(`Content-Length: ${res.headers.get('content-length')} bytes`, 'info') + '\n';
+
+        if (res.ok) {
+          const text = await res.text();
+          output.innerHTML += log(`✓ 成功读取文件，大小: ${text.length} 字符`, 'success') + '\n';
+          output.innerHTML += log(`文件开头: ${text.substring(0, 100)}...`, 'info') + '\n';
+        } else {
+          output.innerHTML += log(`✗ 请求失败`, 'error') + '\n';
+        }
+      } catch (e) {
+        output.innerHTML += log(`🔴 Fetch 失败`, 'error') + '\n';
+        output.innerHTML += log(`错误信息: ${e.message}`, 'error') + '\n';
+        output.innerHTML += log(`可能原因: CORS, 网络问题, 或文件不存在`, 'warning') + '\n';
+      }
+    }
+
+    async function parseAndPreviewVTT() {
+      const vttFile = document.getElementById('vttFile').value.trim() || 'audio_1.vtt';
+      const parseOutput = document.getElementById('parseOutput');
+      const vttPreview = document.getElementById('vttPreview');
+      parseOutput.style.display = 'block';
+      vttPreview.style.display = 'block';
+      parseOutput.innerHTML = log('开始解析 VTT...') + '\n\n';
+      vttPreview.innerHTML = '';
+
+      try {
+        const res = await fetch(vttFile);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+
+        // 简单的 VTT 解析
+        const lines = text.trim().split(/\n+/);
+        const subtitles = [];
+        let i = 0;
+
+        // 跳过 WEBVTT 标记
+        while (i < lines.length && !lines[i].includes('-->')) i++;
+
+        // 解析字幕
+        for (; i < lines.length;) {
+          const timeLine = lines[i];
+          if (!timeLine.includes('-->')) { i++; continue; }
+
+          const [startStr, endStr] = timeLine.split('-->').map(x => x.trim());
+          i++;
+          let en = '', zh = '';
+          if (i < lines.length) { en = lines[i].trim(); i++; }
+          if (i < lines.length) { zh = lines[i].trim(); i++; }
+
+          if (en || zh) {
+            subtitles.push({ time: timeLine, en, zh });
+          }
+        }
+
+        parseOutput.innerHTML += log(`✓ 成功解析 ${subtitles.length} 条字幕`, 'success') + '\n\n';
+
+        // 预览前 5 条
+        let previewHtml = '<div style="margin-bottom: 20px;"><strong>前 5 条字幕预览：</strong></div>';
+        subtitles.slice(0, 5).forEach((sub, idx) => {
+          previewHtml += `
+            <div class="vtt-line">
+              <div class="vtt-timestamp">[${idx + 1}] ${sub.time}</div>
+              <div class="vtt-en">🇬🇧 ${sub.en}</div>
+              <div class="vtt-zh">🇨🇳 ${sub.zh}</div>
+            </div>
+          `;
+        });
+        vttPreview.innerHTML = previewHtml;
+
+      } catch (e) {
+        parseOutput.innerHTML += log(`✗ 解析失败: ${e.message}`, 'error') + '\n';
+      }
+    }
+
+    async function fullDiagnosis() {
+      const output = document.getElementById('diagOutput');
+      output.style.display = 'block';
+      output.innerHTML = '';
+
+      const addLog = (msg, type = 'info') => {
+        output.innerHTML += log(msg, type) + '\n';
+      };
+
+      addLog('🏥 开始完整诊断...\n', 'info');
+
+      // 1. 环境检查
+      addLog('═' + '═'.repeat(50), 'info');
+      addLog('1️⃣  环境检查', 'info');
+      addLog('═' + '═'.repeat(50), 'info');
+      addLog(`浏览器: ${navigator.userAgent.substring(0, 50)}...`, 'info');
+      addLog(`当前 URL: ${window.location.href}`, 'info');
+      addLog(`协议: ${window.location.protocol}`, 'info');
+
+      // 2. 检查关键文件
+      addLog('\n═' + '═'.repeat(50), 'info');
+      addLog('2️⃣  关键文件检查', 'info');
+      addLog('═' + '═'.repeat(50), 'info');
+
+      const criticalFiles = ['audio_1.mp3', 'audio_1.vtt', 'news_1.mp3'];
+      for (const file of criticalFiles) {
+        try {
+          const res = await fetch(file, { method: 'HEAD' });
+          if (res.ok) {
+            addLog(`✓ ${file}`, 'success');
+          } else {
+            addLog(`✗ ${file} (HTTP ${res.status})`, 'error');
+          }
+        } catch (e) {
+          addLog(`✗ ${file} - ${e.message}`, 'error');
+        }
+      }
+
+      // 3. 测试 localStorage
+      addLog('\n═' + '═'.repeat(50), 'info');
+      addLog('3️⃣  localStorage 检查', 'info');
+      addLog('═' + '═'.repeat(50), 'info');
+      try {
+        localStorage.setItem('test', 'ok');
+        localStorage.removeItem('test');
+        addLog('✓ localStorage 可用', 'success');
+        const bbcList = localStorage.getItem('bbcNewsList');
+        if (bbcList) {
+          const data = JSON.parse(bbcList);
+          addLog(`✓ 找到 ${data.length} 条新闻记录`, 'success');
+          if (data[0]) {
+            addLog(`  - 标题: ${data[0].name}`, 'info');
+            addLog(`  - 音频: ${data[0].audio}`, 'info');
+            addLog(`  - 字幕: ${data[0].sub || '(未指定)'}`, 'warning');
+          }
+        }
+      } catch (e) {
+        addLog(`✗ localStorage 错误: ${e.message}`, 'error');
+      }
+
+      // 4. 建议
+      addLog('\n═' + '═'.repeat(50), 'info');
+      addLog('4️⃣  建议', 'info');
+      addLog('═' + '═'.repeat(50), 'info');
+      addLog('如果字幕仍未加载:', 'warning');
+      addLog('  1. 检查浏览器控制台的网络错误 (F12)', 'info');
+      addLog('  2. 确保 VTT 文件与 HTML 在同一目录', 'info');
+      addLog('  3. 尝试本地服务器运行 (避免 CORS 问题)', 'info');
+      addLog('  4. 检查文件名大小写是否正确', 'info');
+    }
+  </script>
+</body>
+</html>
