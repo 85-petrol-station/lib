@@ -1679,7 +1679,6 @@
   <div id="bbcNewsForm" style="display:none; padding:12px 16px;">
   <input type="text" id="bbcArticleName" placeholder="文章名称" style="width:100%;padding:8px;margin-bottom:8px;border-radius:8px;background:var(--bg-input);color:var(--color-text);border:1px solid rgba(34,197,94,0.3);">
   <input type="text" id="bbcUpdateTime" placeholder="日期 例：2025-12-25" style="width:100%;padding:8px;margin-bottom:8px;border-radius:8px;background:var(--bg-input);color:var(--color-text);border:1px solid rgba(34,197,94,0.3);">
-  <input type="text" id="bbcImageName" placeholder="缩略图：thumbnail_1.jpg" style="width:100%;padding:8px;margin-bottom:8px;border-radius:8px;background:var(--bg-input);color:var(--color-text);border:1px solid rgba(34,197,94,0.3);">
   <input type="text" id="bbcBannerImage" placeholder="详情Banner：news_1.jpg" style="width:100%;padding:8px;margin-bottom:8px;border-radius:8px;background:var(--bg-input);color:var(--color-text);border:1px solid rgba(34,197,94,0.3);">
   <input type="text" id="bbcAudioSrc" placeholder="音频：audio_1.mp3" style="width:100%;padding:8px;margin-bottom:8px;border-radius:8px;background:var(--bg-input);color:var(--color-text);border:1px solid rgba(34,197,94,0.3);">
   <input type="text" id="bbcSubSrc" placeholder="字幕：audio_1.vtt" style="width:100%;padding:8px;margin-bottom:8px;border-radius:8px;background:var(--bg-input);color:var(--color-text);border:1px solid rgba(34,197,94,0.3);">
@@ -2183,6 +2182,28 @@
 .fav-wrong-word-btn.active {
   color: #00953d !important;
 }
+
+/* 修复NEWS字幕手机端中文高亮上下分行问题 */
+#newsSubtitleList .subtitle-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 8px;
+  word-break: break-all;
+}
+#newsSubtitleList .sub-en,
+#newsSubtitleList .sub-zh {
+  display: flex;
+  flex-wrap: wrap; /* 仅长文本整体换行，单个单词不拆分 */
+  gap: 2px 4px;
+  line-height: 1.6;
+}
+/* 中英文高亮span禁止单独自动换行，保持同行 */
+.word-cet4, .word-cet6, .word-vocabulary,
+.zh-cet4, .zh-cet6, .zh-vocabulary {
+  display: inline;
+  white-space: nowrap !important; /* 核心：单个词汇永远不换行 */
+}
 </style>
 
 <script>
@@ -2600,14 +2621,15 @@ function highlightNewsSubtitleText(enText, zhText) {
 
     const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regEn = new RegExp(`\\b${escapedWord}\\b`, 'gi');
-    enHtml = enHtml.replace(regEn, `<span class="${enClass}" data-word="${word.toLowerCase()}">$&</span>`);
+    enHtml = enHtml.replace(regEn, `<span class="${enClass}" data-word="${word.toLowerCase()}" style="display:inline-block;white-space:nowrap">$&</span>`);
 
     if (info.meaning) {
       const meanArr = info.meaning.split(/[,，；;]/).map(m => m.trim()).filter(Boolean);
       meanArr.forEach(mean => {
         const escapedMean = mean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const regZh = new RegExp(escapedMean, 'g');
-        zhHtml = zhHtml.replace(regZh, `<span class="${zhClass}">$&</span>`);
+        // 中文高亮增加行内不换行样式，核心修复
+        zhHtml = zhHtml.replace(regZh, `<span class="${zhClass}" style="display:inline-block;white-space:nowrap">$&</span>`);
       });
     }
   });
@@ -3278,12 +3300,13 @@ window.renderBbcNews = window.renderBbcNews || function() {
 window.addBbcNews = window.addBbcNews || async function() {
   const name = document.getElementById('bbcArticleName').value.trim();
   const time = document.getElementById('bbcUpdateTime').value.trim();
-  const img = document.getElementById('bbcImageName').value.trim();
   const banner = document.getElementById('bbcBannerImage').value.trim();
   const audio = document.getElementById('bbcAudioSrc').value.trim();
   const sub = document.getElementById('bbcSubSrc').value.trim();
+  // 缩略图自动复用banner图片
+  const img = banner;
 
-  if (!name || !time || !img || !banner || !audio || !sub) {
+  if (!name || !time || !banner || !audio || !sub) {
     alert('请填写完整信息（必须包含 .vtt 字幕）');
     return;
   }
@@ -3318,7 +3341,6 @@ window.addBbcNews = window.addBbcNews || async function() {
     // 清空表单
     document.getElementById('bbcArticleName').value = '';
     document.getElementById('bbcUpdateTime').value = '';
-    document.getElementById('bbcImageName').value = '';
     document.getElementById('bbcBannerImage').value = '';
     document.getElementById('bbcAudioSrc').value = '';
     document.getElementById('bbcSubSrc').value = '';
@@ -5380,45 +5402,37 @@ function switchSentenceTab(tab) {
   renderSentenceList();
 }
 
-// 🔥 修复：提取整篇 NEWS 所有英文句子（完整全文听写）
+// 修复版：提取整篇 NEWS 所有英文句子（兼容VTT换行、跨行、中英文配对，完整拆分全部字幕句）
 function extractSentencesFromArticle(article) {
   if (!article || !article.content) return [];
+  const rawText = article.content.trim();
+  // 按任意换行分割，去除空白行
+  const allLines = rawText.split(/\r?\n+/).map(s => s.trim()).filter(s => s.length > 0);
+  const sentenceList = [];
+  let i = 0;
 
-  // 1. 按段落拆分，清理空行
-  const lines = article.content
-    .split(/\n+/)
-    .map(line => line.trim())
-    .filter(line => line !== "");
+  while (i < allLines.length) {
+    const line = allLines[i];
+    // 判定：当前行包含英文字母 = 英文原文行
+    const hasEn = /[a-zA-Z]/.test(line);
+    const hasZh = /[\u4e00-\u9fa5]/.test(line);
 
-  const sentences = [];
-
-  // 2. 遍历所有行：英文 + 中文 成对提取
-  for (let i = 0; i < lines.length; i++) {
-    const currentLine = lines[i];
-
-    // 只提取**纯英文行**
-    if (!/[A-Za-z]/.test(currentLine) || /[\u4e00-\u9fa5]/.test(currentLine)) {
-      continue;
+    if (hasEn && !hasZh) {
+      // 纯英文行，读取下一行中文作为翻译
+      let transText = "";
+      if (i + 1 < allLines.length && /[\u4e00-\u9fa5]/.test(allLines[i+1])) {
+        transText = allLines[i+1];
+        i++; // 中文行占用，下标+1跳过
+      }
+      sentenceList.push({
+        text: line,
+        translation: transText,
+        articleName: article.name
+      });
     }
-
-    // 英文句子
-    const enSentence = currentLine;
-
-    // 下一行如果是中文 → 作为翻译
-    let zhSentence = "";
-    if (i + 1 < lines.length && /[\u4e00-\u9fa5]/.test(lines[i + 1])) {
-      zhSentence = lines[i + 1];
-    }
-
-    // 🔥 把每一句英文都加入听写列表
-    sentences.push({
-      text: enSentence,
-      translation: zhSentence,
-      articleName: article.name
-    });
+    i++;
   }
-
-  return sentences;
+  return sentenceList;
 }
 
 // 从所有 NEWS 文章中提取句子（按换行拆分）
