@@ -1545,8 +1545,15 @@
     </div>
   </div>
 
+  <!-- 单词统计栏 新增 -->
+  <div style="padding:10px 16px; display:flex; gap:20px; font-size:16px;">
+    <div>总单词：<span id="articleTotalWordNum" style="color:#00953d; font-weight:bold;">0</span></div>
+    <div>已完成：<span id="articleFinishWordNum" style="color:#00953d; font-weight:bold;">0</span></div>
+    <div>剩余未完成：<span id="articleUnfinishWordNum" style="color:#ff4444; font-weight:bold;">0</span></div>
+  </div>
+
   <!-- 🔥 线段答题卡：每个单词一条横线 -->
-  <div style="padding:12px;height:calc(100vh - 220px);">
+  <div style="padding:0 12px 12px;height:calc(100vh - 260px);">
     <div style="background:var(--bg-card); border-radius:14px; padding:16px; height:100%;overflow:auto;">
       <div id="articleAnswerCard" style="display:flex;flex-wrap:wrap;gap:8px 12px;justify-content:flex-start;align-items:center;line-height:2.2;">
         <!-- 自动生成单词输入框 -->
@@ -3022,7 +3029,8 @@ function renderVoiceList() {
 }
 
 function deleteVoice(el, file) {
-  if (!adminMode) return;
+  // 改为判断语音管理开关
+  if (!voiceAdminMode) return;
   if (!confirm('确定删除这条语音？')) return;
   let list = JSON.parse(localStorage.getItem('voiceList') || '[]');
   list = list.filter(x => x.file !== file);
@@ -3163,6 +3171,7 @@ function scrollToSearchWord() {
 
 adminToggleBtn.onclick = function(){
   adminMode = !adminMode;
+  voiceAdminMode = adminMode; // 同步语音管理开关
   const adminVoiceForm = document.getElementById('adminVoiceForm');
   const dramaAddForm = document.getElementById('dramaAddForm');
   const gtAddForm = document.getElementById('gtAddForm');
@@ -3178,6 +3187,7 @@ adminToggleBtn.onclick = function(){
     gtAddForm.style.display = 'none';
     this.innerText = '管理';
   }
+  // 同时显示视频删除 + 语音删除按钮
   document.querySelectorAll('.voice-del, .video-del-btn').forEach(btn=>{
     btn.style.display=adminMode?'grid':'none';
   });
@@ -3319,12 +3329,14 @@ window.addBbcNews = window.addBbcNews || async function() {
     const vttText = await res.text();
     const subs = parseVtt(vttText);
     
-    // 🔥 把 VTT 字幕拼接成文章正文
     let autoContent = '';
     subs.forEach(item => {
-      autoContent += item.en + '\n';
-      autoContent += item.zh + '\n\n';
+      autoContent += item.en.trim() + '\n';
+      if (item.zh.trim()) autoContent += item.zh.trim() + '\n';
+      autoContent += '\n';
     });
+    // 末尾清除多余空换行，统一格式
+    autoContent = autoContent.replace(/\n{3,}/g, '\n\n').trim();
 
     // 保存 NEWS（正文 = VTT 内容）
     const list = JSON.parse(localStorage.getItem('bbcNewsList') || '[]');
@@ -4744,6 +4756,17 @@ function validateArticleWordInput(input) {
   }
 
   saveCurrentArticleWriteProgress();
+
+  // 实时更新顶部单词统计
+  let finishCount = 0;
+  currentArticleProgress.words.forEach(item=>{
+    if(item.correct) finishCount++;
+  })
+  const totalWord = currentCorrectWords.length;
+  const unFinish = totalWord - finishCount;
+  document.getElementById('articleFinishWordNum').innerText = finishCount;
+  document.getElementById('articleUnfinishWordNum').innerText = unFinish;
+  alert('已保存当前默写进度');
 }
 
 function saveArticleWriteProgress() {
@@ -4875,9 +4898,10 @@ function openArticleWrite(index) {
   const article = allNewsArticles[index];
   const original = article.content.trim();
   
-  // 提取所有英文单词
-  const enText = original.replace(/[\u4e00-\u9fa5]/g, ' ').replace(/\s+/g, ' ').trim();
-  currentCorrectWords = enText.split(' ');
+    // 提取所有英文单词（修复：正则匹配纯英文单词，过滤标点符号，完整抓取全部VTT单词）
+  const enAllText = original.replace(/[\u4e00-\u9fa5]/g, ' ');
+  // 正则精准匹配英文单词（字母/撇号，适配所有VTT英文）
+  currentCorrectWords = enAllText.match(/[a-zA-Z']+/g) || [];
   
   // 生成答题卡
   const container = document.getElementById("articleAnswerCard");
@@ -4984,6 +5008,20 @@ function openArticleWrite(index) {
   document.getElementById("wrongWordsContainer").style.display = "none";
   showPage("articleWriteDetailPage");
 
+  // ========== 新增：渲染单词统计数字 ==========
+  const totalWord = currentCorrectWords.length;
+  // 统计已正确完成的单词
+  let finishCount = 0;
+  currentArticleProgress.words.forEach(item=>{
+    if(item.correct) finishCount++;
+  })
+  const unFinish = totalWord - finishCount;
+  // 赋值到页面DOM
+  document.getElementById('articleTotalWordNum').innerText = totalWord;
+  document.getElementById('articleFinishWordNum').innerText = finishCount;
+  document.getElementById('articleUnfinishWordNum').innerText = unFinish;
+  // ==========================================
+
   setTimeout(() => {
     const nextInput = document.querySelector('#articleAnswerCard input:not([readonly])');
     if (nextInput) nextInput.focus();
@@ -5087,6 +5125,10 @@ function resetArticleWrite() {
   });
   document.getElementById("scoreDisplay").style.display = "none";
   document.getElementById("wrongWordsContainer").style.display = "none";
+
+  // 重置统计数字
+  document.getElementById('articleFinishWordNum').innerText = 0;
+  document.getElementById('articleUnfinishWordNum').innerText = currentCorrectWords.length;
 }
 
 // 退出
@@ -5402,35 +5444,66 @@ function switchSentenceTab(tab) {
   renderSentenceList();
 }
 
-// 修复版：提取整篇 NEWS 所有英文句子（兼容VTT换行、跨行、中英文配对，完整拆分全部字幕句）
+// 修复版：自动合并多行拆分的英文，完整提取VTT所有句子
 function extractSentencesFromArticle(article) {
   if (!article || !article.content) return [];
-  const rawText = article.content.trim();
-  // 按任意换行分割，去除空白行
-  const allLines = rawText.split(/\r?\n+/).map(s => s.trim()).filter(s => s.length > 0);
+  // 统一全部换行符为 \n，消除系统换行差异
+  const rawText = article.content.trim().replace(/\r\n/g, '\n');
+  const allLines = rawText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
   const sentenceList = [];
   let i = 0;
 
   while (i < allLines.length) {
     const line = allLines[i];
-    // 判定：当前行包含英文字母 = 英文原文行
     const hasEn = /[a-zA-Z]/.test(line);
     const hasZh = /[\u4e00-\u9fa5]/.test(line);
 
+    // 1. 遇到英文开头，循环合并后续所有连续纯英文行（解决VTT英文分行）
     if (hasEn && !hasZh) {
-      // 纯英文行，读取下一行中文作为翻译
-      let transText = "";
-      if (i + 1 < allLines.length && /[\u4e00-\u9fa5]/.test(allLines[i+1])) {
-        transText = allLines[i+1];
-        i++; // 中文行占用，下标+1跳过
+      let fullEn = line;
+      i++;
+      // 循环读取下一行，只要还是纯英文就拼接
+      while (i < allLines.length) {
+        const nextLine = allLines[i];
+        const nextHasEn = /[a-zA-Z]/.test(nextLine);
+        const nextHasZh = /[\u4e00-\u9fa5]/.test(nextLine);
+        if (nextHasEn && !nextHasZh) {
+          fullEn += ' ' + nextLine;
+          i++;
+        } else break;
       }
+      // 拼接完多行英文后，读取紧随其后的中文翻译行
+      let transText = '';
+      if (i < allLines.length) {
+        const transLine = allLines[i];
+        if (/[\u4e00-\u9fa5]/.test(transLine) && !/[a-zA-Z]/.test(transLine)) {
+          transText = transLine;
+          i++;
+        }
+      }
+      fullEn = fullEn.replace(/\s+/g, ' ').trim();
       sentenceList.push({
-        text: line,
+        text: fullEn,
         translation: transText,
         articleName: article.name
       });
     }
-    i++;
+    // 2. 本行中英文混合（单行同时有中英），直接提取英文
+    else if (hasEn && hasZh) {
+      let enText = line.replace(/[\u4e00-\u9fa5]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (enText) {
+        sentenceList.push({
+          text: enText,
+          translation: '',
+          articleName: article.name
+        });
+      }
+      i++;
+    }
+    // 3. 纯中文无英文，跳过
+    else {
+      i++;
+    }
   }
   return sentenceList;
 }
@@ -6248,9 +6321,9 @@ function loadSentenceTimeForListen(article) {
       const sentences = SentenceWriteLogic.getSentenceList();
 
       sentences.forEach(sen => {
-        const matchSub = subs.find(sub =>
-          sen.text.trim().toLowerCase() === sub.en.trim().toLowerCase()
-        );
+        const cleanSenText = sen.text.trim().toLowerCase().replace(/[.,!?]/g, '');
+        const cleanSubEn = sub.en.trim().toLowerCase().replace(/[.,!?]/g, '');
+        const matchSub = subs.find(sub => cleanSubEn === cleanSenText);
         if (matchSub) {
           sen.startTime = matchSub.start;
           sen.endTime = matchSub.end;
@@ -6320,24 +6393,6 @@ window.renderCet6Spell = function() {
   originalRenderCet6Spell();
   autoFocusFirstInput6();
 };
-
-// 语音管理开关
-let voiceAdminMode = false;
-function toggleVoiceAdmin(){
-  voiceAdminMode = !voiceAdminMode;
-  const delBtns = document.querySelectorAll(".voice-del-btn");
-  const adminForm = document.getElementById("adminVoiceForm");
-  // 切换新增语音表单显示/隐藏
-  if(voiceAdminMode){
-    adminForm.style.display = "block";
-    delBtns.forEach(btn=>btn.style.display="grid");
-    document.getElementById("adminToggleBtn").innerText = "退出管理";
-  }else{
-    adminForm.style.display = "none";
-    delBtns.forEach(btn=>btn.style.display="none");
-    document.getElementById("adminToggleBtn").innerText = "管理";
-  }
-}
 
 </script>
 </body>
