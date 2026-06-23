@@ -1513,39 +1513,6 @@
   display: inline;
   white-space: nowrap !important; /* 核心：单个词汇永远不换行 */
 }
-
-/* 音频进度条轨道基础样式 */
-#bbcAudioProgress {
-  -webkit-appearance: none;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(34,197,94,0.2);
-  outline: none;
-}
-/* 隐藏浏览器原生滑块圆点 */
-#bbcAudioProgress::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 0;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-image: none; /* JS动态替换图片 */
-  cursor: pointer;
-}
-#bbcAudioProgress::-moz-range-thumb {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 0;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-image: none;
-  cursor: pointer;
-}
 </style>
 
 <div class="modal-overlay" id="modalOverlay"></div>
@@ -2005,7 +1972,7 @@
 </div>
 
 <!-- 三级详情页（参考你给的版式） -->
-<div id="bbcDetailPage" class="page" style="display:flex; flex-direction:column; height:100dvh; overflow:hidden;">
+<div id="bbcDetailPage" class="page">
   <div class="secondary-header">
     <div class="secondary-title">NEWS 详情</div>
     <div class="header-back-btn" onclick="stopBbcAudioAndBack()">
@@ -2013,19 +1980,33 @@
   </div>
 
   <!-- 1. 顶部Banner大图 -->
-  <div style="padding:2 16px 18px;">
-    <div style="width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden;">
+  <div style="padding:0 16px 10px;">
+    <div style="width:100%; aspect-ratio:16/9; border-radius:14px; overflow:hidden;">
       <img id="bbcDetailBanner" src="" alt="news banner" style="width:100%;height:100%;object-fit:cover;display:block;">
     </div>
   </div>
-  
+
+  <!-- 🔥 改为两个按钮：翻译全文 / 关闭字幕 -->
+  <div style="padding:0 16px; display:flex; gap:8px; margin-bottom:10px;">
+    <button id="translateFullBtn" onclick="toggleNewsTranslation()" 
+            style="flex:1; padding:8px; border-radius:10px; border:none; 
+                   background:#00953d; color:#fff; font-size:14px;">
+      显示中文字幕
+    </button>
+    <button id="subToggleBtn" onclick="toggleNewsSubtitle()" 
+            style="flex:1; padding:8px; border-radius:10px; border:none; 
+                   background:#ccc; color:#222; font-size:14px;">
+      关闭字幕
+    </button>
+  </div>
+
   <!-- 2. 中间文章内容（可滚动，底部给音频留空间） -->
-  <div style="padding:4px 16px 24px; line-height:1.3; font-size:12px; color:var(--color-text);">
-    <div id="bbcDetailTitle" style="font-size:18px; font-weight:bold; color:#00953d; margin-bottom:4px;"></div>
-    <div id="bbcDetailMeta" style="font-size:10px; color:var(--color-text-secondary); margin-bottom:4px; display:flex; gap:8px;">
+  <div style="padding:10px 16px 16px; line-height:1.8; font-size:16px; color:var(--color-text);">
+    <div id="bbcDetailTitle" style="font-size:20px; font-weight:bold; color:#00953d; margin-bottom:3px;"></div>
+    <div id="bbcDetailMeta" style="font-size:13px; color:var(--color-text-secondary); margin-bottom:4px; display:flex; gap:12px;">
       <span id="bbcDetailTime"></span>
     </div>
-    <hr style="border:0; border-top:1px solid rgba(34,197,94,0.2); margin-bottom:2px;">
+    <hr style="border:0; border-top:1px solid rgba(34,197,94,0.2); margin-bottom:4px;">
     <div id="bbcDetailContent" style="white-space:pre-wrap; display:none;"></div>
   </div>
 
@@ -2037,57 +2018,22 @@
       </div>
   </div>
 
-  <!-- 自定义进度滑块图片上传 隐藏控件 -->
-  <input type="file" id="progressThumbUpload" accept="image/png,image/gif" style="display:none;">
-
   <!-- 3. 底部音频播放器（固定到底部） -->
-  <div style="position:fixed; bottom:0; left:0; right:0; background:var(--bg-tabbar); border-top:1px solid rgba(34,197,94,0.3); padding:8px 16px 8px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index:99;">
+  <div style="position:fixed; bottom:0; left:0; right:0; background:var(--bg-tabbar); border-top:1px solid rgba(34,197,94,0.3); padding:12px 16px 16px; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index:99;">
     <audio id="bbcAudioPlayer" preload="metadata"></audio>
 
     <div style="display:flex; align-items:center; gap:12px; margin-top:8px;">
       <span id="bbcAudioCurrent" style="font-size:14px; color:var(--color-text-secondary); width:40px;">00:00</span>
-      <input type="range" id="bbcAudioProgress" min="0" max="100" value="0" style="flex:1;-webkit-appearance: none;appearance: none;background: transparent; /* 移除默认整块绿色底色 */height:2px; /* 控制绿线粗细，数字越小越细，2/3/4自选 */">
+      <input type="range" id="bbcAudioProgress" min="0" max="100" value="0" style="flex:1;">
       <span id="bbcAudioDuration" style="font-size:14px; color:var(--color-text-secondary); width:40px;">00:00</span>
     </div>
 
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; gap:6px;">
-      <!-- 左侧按钮组：显示中文字幕 + 上一句 -->
-      <div style="display:flex; gap:6px; flex:1; justify-content:flex-start;">
-        <button id="translateFullBtn" onclick="toggleNewsTranslation()" 
-                style="padding:6px 10px; border-radius:8px; border:none; 
-                       background:#00953d; color:#fff; font-size:12px; white-space:nowrap;">
-          显示中文字幕
-        </button>
-        <button onclick="prevNewsSubtitle()" 
-                style="padding:6px 10px; border-radius:4px; background:transparent; 
-                       color:var(--color-text); border:0.5px solid var(--color-text-secondary); 
-                       font-size:12px; white-space:nowrap;">
-          上一句
-        </button>
-      </div>
-
-      <!-- 中间：播放按钮 -->
-      <button id="bbcPlayBtn" onclick="toggleBbcAudio()" 
-              style="width:50px; height:50px; border-radius:50%; background:#00953d; 
-                     color:#fff; border:none; font-size:24px; display:grid; place-items:center; 
-                     flex-shrink:0;">
-        ▶
-      </button>
-
-      <!-- 右侧按钮组：下一句 + 关闭字幕 -->
-      <div style="display:flex; gap:6px; flex:1; justify-content:flex-end;">
-        <button onclick="nextNewsSubtitle()" 
-                style="padding:6px 10px; border-radius:4px; background:transparent; 
-                      color:var(--color-text); border:0.5px solid var(--color-text-secondary); 
-                       font-size:12px; white-space:nowrap;">
-          下一句
-        </button>
-        <button id="subToggleBtn" onclick="toggleNewsSubtitle()" 
-                style="padding:6px 10px; border-radius:8px; border:none; 
-                      background:#ccc; color:#222; font-size:12px; white-space:nowrap;">
-          关闭字幕
-        </button>
-      </div>
+    <div style="display:flex; justify-content:space-around; align-items:center; margin-top:10px;">
+      <!-- 上一句：把 border-radius:10% 改成 4px 小圆角，想要完全直角填 0 -->
+      <button onclick="prevNewsSubtitle()" style="width:50px; height:34px; border-radius:4px; background:transparent; color:var(--color-text); border:0.5px solid var(--color-text-secondary); font-size:12px;">上一句</button>
+      <button id="bbcPlayBtn" onclick="toggleBbcAudio()" style="width:50px; height:50px; border-radius:50%; background:#00953d; color:#00953d; border:none; font-size:24px; display:grid; place-items:center;">▶</button>
+      <!-- 下一句：删掉 border-radius:50% 圆形，替换成小圆角 -->
+      <button onclick="nextNewsSubtitle()" style="width:50px; height:34px; border-radius:4px; background:transparent; color:var(--color-text); border:0.5px solid var(--color-text-secondary); font-size:12px;">下一句</button>
     </div>
   </div>
 </div>
@@ -3631,7 +3577,7 @@ window.nextNewsSubtitle = window.nextNewsSubtitle || function() {
 
 window.toggleNewsTranslation = window.toggleNewsTranslation || function() {
   window.newsShowZh = !window.newsShowZh;
-  document.getElementById('translateFullBtn').innerText = window.newsShowZh ? '隐藏中文' : '显示中文字幕';
+  document.getElementById('translateFullBtn').innerText = window.newsShowZh ? '隐藏中文字幕' : '显示中文字幕';
   renderNewsSubtitles();
 }
 
@@ -6489,107 +6435,6 @@ window.renderCet6Spell = function() {
   originalRenderCet6Spell();
   autoFocusFirstInput6();
 };
-
-// ========== 自定义音频进度条滑块图片 完整逻辑 ==========
-const progressInput = document.getElementById('bbcAudioProgress');
-const progressFileInput = document.getElementById('progressThumbUpload');
-const STORAGE_KEY_PROGRESS_THUMB = 'custom_progress_thumb_img';
-
-// 初始化：读取本地保存的滑块图片
-function initCustomProgressThumb() {
-  const savedImg = localStorage.getItem(STORAGE_KEY_PROGRESS_THUMB);
-  if (savedImg) setProgressThumbImage(savedImg);
-}
-
-// 将图片赋值给进度条滑块背景
-function setProgressThumbImage(imgBase64) {
-  // webkit内核（Chrome、Safari、移动端）
-  progressInput.style.setProperty('--thumb-bg', `url(${imgBase64})`);
-  progressInput.querySelector('style')?.remove();
-  const styleInject = document.createElement('style');
-  styleInject.textContent = `
-    #bbcAudioProgress::-webkit-slider-thumb {
-      background-image: var(--thumb-bg) !important;
-      width: 17px;    /* 滑块宽度，数字越小图越小 */
-      height: 17px;   /* 滑块高度 */
-      background-size: contain;  /* 完整缩放图片，不变形 */
-      background-repeat: no-repeat;
-      background-position: center;
-      border: none;
-      border-radius: 50%;
-    }
-    #bbcAudioProgress::-moz-range-thumb {
-      background-image: var(--thumb-bg) !important;
-      width: 14px;
-      height: 14px;
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      border: none;
-      border-radius: 50%;
-    }
-  `;
-document.head.appendChild(styleInject);
-  localStorage.setItem(STORAGE_KEY_PROGRESS_THUMB, imgBase64);
-}
-
-// 读取上传图片并转base64保存
-function handleProgressThumbUpload(file) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const base64 = e.target.result;
-    setProgressThumbImage(base64);
-    alert('滑块图片设置成功！');
-  };
-  reader.readAsDataURL(file);
-}
-
-// 长按进度条唤起上传
-let progressLongPressTimer = null;
-progressInput.addEventListener('mousedown', () => {
-  progressLongPressTimer = setTimeout(() => {
-    progressFileInput.click();
-  }, 200); // 长按200ms触发上传
-});
-progressInput.addEventListener('mouseup', () => clearTimeout(progressLongPressTimer));
-progressInput.addEventListener('mouseleave', () => clearTimeout(progressLongPressTimer));
-// 移动端触摸长按兼容
-progressInput.addEventListener('touchstart', () => {
-  progressLongPressTimer = setTimeout(() => {
-    progressFileInput.click();
-  }, 200);
-});
-progressInput.addEventListener('touchend', () => clearTimeout(progressLongPressTimer));
-progressInput.addEventListener('touchcancel', () => clearTimeout(progressLongPressTimer));
-
-// 文件选择监听
-progressFileInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  // 校验格式
-  const allowType = ['image/png','image/gif'];
-  if (!allowType.includes(file.type)) {
-    alert('仅支持 PNG / GIF 格式图片！');
-    return;
-  }
-  // 校验大小
-  if (file.size > 524288) {
-    alert('图片不能大于500KB！');
-    return;
-  }
-  handleProgressThumbUpload(file);
-});
-
-// 页面加载自动初始化滑块图片
-window.addEventListener('load', initCustomProgressThumb);
-// 打开NEWS详情页时强制刷新滑块图片
-const bbcDetailPageDom = document.getElementById('bbcDetailPage');
-const bbcPageObserver = new MutationObserver(() => {
-  if (bbcDetailPageDom.classList.contains('active')) {
-    initCustomProgressThumb();
-  }
-});
-bbcPageObserver.observe(bbcDetailPageDom, {attributes:true});
 
 </script>
 </body>
