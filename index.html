@@ -1175,6 +1175,338 @@
     margin-top: 2px;
     text-align: center;
   }
+
+/* CET4 标签按钮样式 */
+.cet4-tab-btn.active {
+  background:var(--bg-card-light);
+  color:var(--color-text);
+  font-weight:600;
+}
+/* 单词列表日期分组 */
+.cet4-date-group {
+  margin-bottom:16px;
+}
+.cet4-date-title {
+  font-size:17px; font-weight:600; color:var(--color-text); margin-bottom:8px; padding-left:4px;
+}
+.cet4-word-item {
+  display:flex; align-items:center; padding:12px 0; border-bottom:1px solid rgba(34,197,94,0.1);
+}
+.cet4-word-checkbox {
+  width: 14px;          /* 改这里：圆宽度 */
+  height: 14px;         /* 改这里：圆高度 */
+  border-radius: 50%;
+  border: 1px solid var(--color-text-secondary);
+  margin-right: 12px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.cet4-word-checkbox.checked {
+  background: #00953d;
+  border-color: #00953d;
+}
+
+.cet4-word-name {
+  font-size:19px; color:var(--color-text);
+}
+/* 答题选项样式 */
+.cet4-exam-option {
+  background:var(--bg-nav); border-radius:12px; padding:16px; font-size:16px; color:var(--color-text); cursor:pointer; transition:all 0.2s;
+}
+.cet4-exam-option:hover {
+  background:rgba(34,197,94,0.2);
+}
+.cet4-exam-option.correct {
+  background:rgba(34,197,94,0.5); color:#fff;
+}
+/* 选错答案改为灰色 */
+.cet4-exam-option.wrong {
+  background:#a73e3e; color:#fff;
+}
+
+/* 答案：词性灰色 + 词义白色 */
+.cet4-exam-option {
+  display: flex;
+  gap: 8px;
+}
+.cet4-exam-option::first-line {
+  color: #fff !important;
+}
+.cet4-exam-option {
+  color: var(--color-text-secondary) !important;
+}
+.cet6-tab-btn.active {
+  background:var(--bg-card-light);
+  color:var(--color-text);
+  font-weight:600;
+}
+.cet6-date-group {
+  margin-bottom:16px;
+}
+.cet6-date-title {
+  font-size:17px; font-weight:600; color:var(--color-text); margin-bottom:8px; padding-left:4px;
+}
+.cet6-word-item {
+  display:flex; align-items:center; padding:12px 0; border-bottom:1px solid rgba(34,197,94,0.1);
+}
+.cet6-word-checkbox {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--color-text-secondary);
+  margin-right: 12px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.cet6-word-checkbox.checked {
+  background: #00953d;
+  border-color: #00953d;
+}
+.cet6-word-name {
+  font-size:19px; color:var(--color-text);
+}
+.cet6-exam-option {
+  background:var(--bg-nav); border-radius:12px; padding:16px; font-size:16px; color:var(--color-text); cursor:pointer; transition:all 0.2s;
+}
+.cet6-exam-option:hover {
+  background:rgba(34,197,94,0.2);
+}
+.cet6-exam-option.correct {
+  background:rgba(34,197,94,0.5); color:#fff;
+}
+.cet6-exam-option.wrong {
+  background:#a73e3e; color:#fff;
+}
+.cet6-exam-option {
+  display: flex;
+  gap: 8px;
+}
+
+/* 文章默写标签绿色高亮 */
+.article-tab-btn.active {
+  background: #00953d !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* 🔥 文章默写 - 线段答题卡样式 */
+.article-word-input {
+  min-width: 50px;    /* 🔥 手机更小 */
+  max-width: 90px;    /* 🔥 手机更小 */
+  flex: 1;            /* 🔥 自动适应 */
+  padding: 4px 2px;
+  border: none;
+  border-bottom: 2px solid #aaa;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 14px;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+}
+.article-word-input.correct {
+  border-bottom-color: #22c55e;
+  color: #22c55e;
+}
+.article-word-input.wrong {
+  border-bottom-color: #ff4444;
+  color: #ff4444;
+}
+
+/* 错误单词列表样式 */
+.wrong-word-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,68,68,0.1);
+  color: var(--color-text);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.wrong-word-text {
+  color: #ff4444;
+  font-weight: 500;
+}
+.wrong-word-mean {
+  color: var(--color-text-secondary);
+  margin-left: 8px;
+}
+.wrong-word-fav {
+  color: #00953d;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(34,197,94,0.1);
+}
+.wrong-word-fav:active {
+  background: rgba(34,197,94,0.2);
+}
+
+/* 收藏夹标签样式 */
+.fav-tab-btn.active {
+  background: #00953d !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+/* 收藏项卡片 */
+  .fav-item {
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 10px; /* 进一步缩小内边距 */
+  margin-bottom: 6px; /* 进一步缩小行间距 */
+  border: 1px solid rgba(34,197,94,0.2);
+  cursor: pointer;
+  position: relative;
+ }
+  .fav-item-number{
+    display:inline-block;
+    width:24px;
+    height:24px;
+    background: transparent; /* 去掉绿色圆形底 */
+    color: #00953d; /* 保留绿色文本，若需改色可调整 */
+    border-radius:50%;
+    text-align:center;
+    line-height:24px;
+    font-size:12px;
+    font-weight:300; /* 细体 */
+    margin-right:8px;
+    flex-shrink:0;
+  }
+  .fav-sentence-text {
+    font-size: 14px;
+    color: var(--color-text);
+    margin-bottom: 2px;
+    line-height: 1.2; /* 进一步缩小行高 */
+  }
+  .fav-sentence-trans {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    font-weight: 300; /* 细体 */
+  }
+  .fav-word-text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #00953d;
+    margin-bottom: 4px;
+  }
+  .fav-word-phonetic {
+    font-size: 14px;
+    color: #90ee90;
+    margin-bottom: 6px;
+  }
+  .fav-word-mean {
+    font-size: 15px;
+    color: var(--color-text);
+    font-weight: 300; /* 中文细体 */
+  }
+  /* 取消收藏按钮 */
+  .fav-remove-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(120,120,120,0.4);
+    color: #fff;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 14px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition:all 0.2s;
+  }
+  .fav-remove-btn:hover{
+    background: rgba(120,120,120,0.6);
+  color: var(--color-text);
+  font-size: 14px;
+  text-align: center;
+  outline: none;
+  transition: all 0.2s;
+}
+.sentence-word-input {
+  width: 90px;
+  min-width: 60px;
+  padding: 6px 0 2px;
+  margin: 0 8px 8px 0;
+  border: none;
+  border-bottom: 2px solid #aaa;
+  background: transparent;
+  text-align: center;
+  font-size: 16px;
+  color: #ffffff !important;
+  outline: none;
+}
+.sentence-word-input::placeholder {
+  color: rgba(34, 34, 34, 0.3);
+}
+.sentence-word-input:focus {
+  border-bottom-color: #00953d;
+}
+.sentence-word-input.correct {
+  border-bottom-color: #22c55e;
+  color: #22c55e;
+}
+.sentence-word-input.wrong {
+  border-bottom-color: #ff4444;
+  color: #ff4444;
+}
+.sentence-word-hint {
+  display: none;
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+  text-align: center;
+  min-height: 16px;
+}
+
+/* 结果样式 */
+#sentenceWriteResult.right {
+  background: rgba(34,197,94,0.15);
+  color: #58f198;
+}
+#sentenceWriteResult.wrong {
+  background: rgba(255,68,68,0.15);
+  color: #ff6961;
+}
+
+.fav-wrong-word-btn.active {
+  color: #00953d !important;
+}
+/* 语音条按时长区分宽度 */
+.voice-bar {
+  width: 160px; /* 默认兜底宽度，30s以上统一这个尺寸 */
+}
+.voice-bar.dur-under5 {
+  width: 80px;
+}
+.voice-bar.dur-5to10 {
+  width: 110px;
+}
+.voice-bar.dur-10to15 {
+  width: 140px;
+}
+.voice-bar.dur-15to20 {
+  width: 170px;
+}
+.voice-bar.dur-20to30 {
+  width: 200px;
+}
+/* 语音、视频删除按钮默认隐藏 */
+.voice-del, .video-del-btn {
+  display: none;
+}
+/* 开启管理模式后，全部删除按钮显示 */
+body.admin-on .voice-del,
+body.admin-on .video-del-btn {
+  display: grid !important;
+}
 </style>
 
 <div class="modal-overlay" id="modalOverlay"></div>
@@ -1432,71 +1764,6 @@
   <!-- 选项列表 -->
   <div id="cet4ExamOptions" style="padding:0 16px; margin-top:150px; display:flex; flex-direction:column; gap:12px;"></div>
 </div>
-
-
-<style>
-/* CET4 标签按钮样式 */
-.cet4-tab-btn.active {
-  background:var(--bg-card-light);
-  color:var(--color-text);
-  font-weight:600;
-}
-/* 单词列表日期分组 */
-.cet4-date-group {
-  margin-bottom:16px;
-}
-.cet4-date-title {
-  font-size:17px; font-weight:600; color:var(--color-text); margin-bottom:8px; padding-left:4px;
-}
-.cet4-word-item {
-  display:flex; align-items:center; padding:12px 0; border-bottom:1px solid rgba(34,197,94,0.1);
-}
-.cet4-word-checkbox {
-  width: 14px;          /* 改这里：圆宽度 */
-  height: 14px;         /* 改这里：圆高度 */
-  border-radius: 50%;
-  border: 1px solid var(--color-text-secondary);
-  margin-right: 12px;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-}
-.cet4-word-checkbox.checked {
-  background: #00953d;
-  border-color: #00953d;
-}
-
-.cet4-word-name {
-  font-size:19px; color:var(--color-text);
-}
-/* 答题选项样式 */
-.cet4-exam-option {
-  background:var(--bg-nav); border-radius:12px; padding:16px; font-size:16px; color:var(--color-text); cursor:pointer; transition:all 0.2s;
-}
-.cet4-exam-option:hover {
-  background:rgba(34,197,94,0.2);
-}
-.cet4-exam-option.correct {
-  background:rgba(34,197,94,0.5); color:#fff;
-}
-/* 选错答案改为灰色 */
-.cet4-exam-option.wrong {
-  background:#a73e3e; color:#fff;
-}
-
-/* 答案：词性灰色 + 词义白色 */
-.cet4-exam-option {
-  display: flex;
-  gap: 8px;
-}
-.cet4-exam-option::first-line {
-  color: #fff !important;
-}
-.cet4-exam-option {
-  color: var(--color-text-secondary) !important;
-}
-</style>
-
 <!-- ===================== 文章默写模块（参考你手稿布局） ===================== -->
 <div id="articleWritePage" class="page">
   <div class="secondary-header">
@@ -1941,279 +2208,7 @@
 <input type="file" id="speakerImageInput" accept="image/png" style="display:none;">
 
 
-<style>
-.cet6-tab-btn.active {
-  background:var(--bg-card-light);
-  color:var(--color-text);
-  font-weight:600;
-}
-.cet6-date-group {
-  margin-bottom:16px;
-}
-.cet6-date-title {
-  font-size:17px; font-weight:600; color:var(--color-text); margin-bottom:8px; padding-left:4px;
-}
-.cet6-word-item {
-  display:flex; align-items:center; padding:12px 0; border-bottom:1px solid rgba(34,197,94,0.1);
-}
-.cet6-word-checkbox {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid var(--color-text-secondary);
-  margin-right: 12px;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-}
-.cet6-word-checkbox.checked {
-  background: #00953d;
-  border-color: #00953d;
-}
-.cet6-word-name {
-  font-size:19px; color:var(--color-text);
-}
-.cet6-exam-option {
-  background:var(--bg-nav); border-radius:12px; padding:16px; font-size:16px; color:var(--color-text); cursor:pointer; transition:all 0.2s;
-}
-.cet6-exam-option:hover {
-  background:rgba(34,197,94,0.2);
-}
-.cet6-exam-option.correct {
-  background:rgba(34,197,94,0.5); color:#fff;
-}
-.cet6-exam-option.wrong {
-  background:#a73e3e; color:#fff;
-}
-.cet6-exam-option {
-  display: flex;
-  gap: 8px;
-}
 
-/* 文章默写标签绿色高亮 */
-.article-tab-btn.active {
-  background: #00953d !important;
-  color: #fff !important;
-  font-weight: 600;
-}
-
-/* 🔥 文章默写 - 线段答题卡样式 */
-.article-word-input {
-  min-width: 50px;    /* 🔥 手机更小 */
-  max-width: 90px;    /* 🔥 手机更小 */
-  flex: 1;            /* 🔥 自动适应 */
-  padding: 4px 2px;
-  border: none;
-  border-bottom: 2px solid #aaa;
-  background: transparent;
-  color: var(--color-text);
-  font-size: 14px;
-  text-align: center;
-  outline: none;
-  transition: all 0.2s;
-}
-.article-word-input.correct {
-  border-bottom-color: #22c55e;
-  color: #22c55e;
-}
-.article-word-input.wrong {
-  border-bottom-color: #ff4444;
-  color: #ff4444;
-}
-
-/* 错误单词列表样式 */
-.wrong-word-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(255,68,68,0.1);
-  color: var(--color-text);
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 14px;
-  margin-bottom: 4px;
-}
-.wrong-word-text {
-  color: #ff4444;
-  font-weight: 500;
-}
-.wrong-word-mean {
-  color: var(--color-text-secondary);
-  margin-left: 8px;
-}
-.wrong-word-fav {
-  color: #00953d;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(34,197,94,0.1);
-}
-.wrong-word-fav:active {
-  background: rgba(34,197,94,0.2);
-}
-
-/* 收藏夹标签样式 */
-.fav-tab-btn.active {
-  background: #00953d !important;
-  color: #fff !important;
-  font-weight: 600;
-}
-
-/* 收藏项卡片 */
-  .fav-item {
-  background: var(--bg-card);
-  border-radius: 14px;
-  padding: 10px; /* 进一步缩小内边距 */
-  margin-bottom: 6px; /* 进一步缩小行间距 */
-  border: 1px solid rgba(34,197,94,0.2);
-  cursor: pointer;
-  position: relative;
- }
-  .fav-item-number{
-    display:inline-block;
-    width:24px;
-    height:24px;
-    background: transparent; /* 去掉绿色圆形底 */
-    color: #00953d; /* 保留绿色文本，若需改色可调整 */
-    border-radius:50%;
-    text-align:center;
-    line-height:24px;
-    font-size:12px;
-    font-weight:300; /* 细体 */
-    margin-right:8px;
-    flex-shrink:0;
-  }
-  .fav-sentence-text {
-    font-size: 14px;
-    color: var(--color-text);
-    margin-bottom: 2px;
-    line-height: 1.2; /* 进一步缩小行高 */
-  }
-  .fav-sentence-trans {
-    font-size: 14px;
-    color: var(--color-text-secondary);
-    font-weight: 300; /* 细体 */
-  }
-  .fav-word-text {
-    font-size: 18px;
-    font-weight: bold;
-    color: #00953d;
-    margin-bottom: 4px;
-  }
-  .fav-word-phonetic {
-    font-size: 14px;
-    color: #90ee90;
-    margin-bottom: 6px;
-  }
-  .fav-word-mean {
-    font-size: 15px;
-    color: var(--color-text);
-    font-weight: 300; /* 中文细体 */
-  }
-  /* 取消收藏按钮 */
-  .fav-remove-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(120,120,120,0.4);
-    color: #fff;
-    border: none;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    font-size: 14px;
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    transition:all 0.2s;
-  }
-  .fav-remove-btn:hover{
-    background: rgba(120,120,120,0.6);
-  color: var(--color-text);
-  font-size: 14px;
-  text-align: center;
-  outline: none;
-  transition: all 0.2s;
-}
-.sentence-word-input {
-  width: 90px;
-  min-width: 60px;
-  padding: 6px 0 2px;
-  margin: 0 8px 8px 0;
-  border: none;
-  border-bottom: 2px solid #aaa;
-  background: transparent;
-  text-align: center;
-  font-size: 16px;
-  color: #ffffff !important;
-  outline: none;
-}
-.sentence-word-input::placeholder {
-  color: rgba(34, 34, 34, 0.3);
-}
-.sentence-word-input:focus {
-  border-bottom-color: #00953d;
-}
-.sentence-word-input.correct {
-  border-bottom-color: #22c55e;
-  color: #22c55e;
-}
-.sentence-word-input.wrong {
-  border-bottom-color: #ff4444;
-  color: #ff4444;
-}
-.sentence-word-hint {
-  display: none;
-  font-size: 12px;
-  color: #999;
-  margin-top: 4px;
-  text-align: center;
-  min-height: 16px;
-}
-
-/* 结果样式 */
-#sentenceWriteResult.right {
-  background: rgba(34,197,94,0.15);
-  color: #58f198;
-}
-#sentenceWriteResult.wrong {
-  background: rgba(255,68,68,0.15);
-  color: #ff6961;
-}
-
-.fav-wrong-word-btn.active {
-  color: #00953d !important;
-}
-/* 语音条按时长区分宽度 */
-.voice-bar {
-  width: 160px; /* 默认兜底宽度，30s以上统一这个尺寸 */
-}
-.voice-bar.dur-under5 {
-  width: 80px;
-}
-.voice-bar.dur-5to10 {
-  width: 110px;
-}
-.voice-bar.dur-10to15 {
-  width: 140px;
-}
-.voice-bar.dur-15to20 {
-  width: 170px;
-}
-.voice-bar.dur-20to30 {
-  width: 200px;
-}
-/* 语音、视频删除按钮默认隐藏 */
-.voice-del, .video-del-btn {
-  display: none;
-}
-/* 开启管理模式后，全部删除按钮显示 */
-body.admin-on .voice-del,
-body.admin-on .video-del-btn {
-  display: grid !important;
-}
-</style>
 
 <script>
 let lastPageBeforeVideo = "mainPage";
